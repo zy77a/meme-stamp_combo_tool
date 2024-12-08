@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meme Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Impact&display=swap" rel="stylesheet">
+    <style>
+    
+    /* Prevent horizontal scrolling, keep vertical scroll */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%; /* Ensures full height of the window */
+    width: 100%; /* Ensures full width of the window */
+    box-sizing: border-box;
+    overflow-x: hidden; /* Prevents horizontal scrolling */
+    overflow-y: auto; /* Enables vertical scrolling */
+}
+        /* Canvas Container */
+        .canvas-container {
+            position: relative;
+            width: 100vw;
+            height: 100vw;
+            background-color: #ccc;
+            border: 0px solid #000;
+            margin: 0px auto;
+            overflow: hidden;
+        }
+
+        .background-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
+        }
+
+        .small-square {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.6);
+            border: 0px solid #000;
+            z-index: 2;
+            cursor: grab;
+            width: 26%;
+            height: 26%;
+            top: 35%;
+            left: 5%;
+            overflow: hidden;
+        }
+
+        /* Ensuring image inside the small square is constrained */
+        #smallSquareImg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* or 'contain' if you want the entire image to fit */
+            pointer-events: none;
+        }
+
+        .large-square-text, .small-square-text {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .text {
+            font-family: "Impact", sans-serif;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
+            -webkit-text-stroke: 1.5px black;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: normal;
+            overflow-wrap: break-word;
+            pointer-events: none;
+        }
+
+        #line1Text, #line1LargeText {
+            top: 5%;
+            width: 90%;
+            text-align: center;
+        }
+
+        #line2Text, #line2LargeText {
+            bottom: 5%;
+            width: 90%;
+            text-align: center;
+        }
+
+        /* Controls Container */
+        .controls-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            margin-top: 0px;
+            align-items: flex-start;
+        }
+
+        .controls {
+            width: 48%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            background-color: white;
+            padding: 30px;
+            border-radius: 1px;
+            box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls input[type="text"], .controls input[type="range"] {
+            margin: 2px 0;
+            width: 100%;
+            padding: 2px;
+        }
+
+        .drag-drop {
+            margin-top: 2px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .drag-drop .drop-zone {
+            width: 45%;
+            height: 150px;
+            border: 1.5px dashed #000;
+            text-align: center;
+            line-height: 150px;
+            font-size: 16px;
+            background-color: #f4f4f4;
+            color: #000;
+            cursor: pointer;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .upload-button {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #53bba5;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .upload-button:hover {
+            background-color: #53bb15;
+        }
+
+        #renderedImageWrapper {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-container">
+        <div id="backgroundImage" class="background-image"></div>
+
+        <!-- Large Background Text -->
+        <div class="large-square-text">
+            <div id="line1LargeText" class="text">TOP TEXT</div>
+            <div id="line2LargeText" class="text">BOTTOM TEXT</div>
+        </div>
+
+        <div id="smallSquare" class="small-square">
+            <div class="small-square-text">
+                <div id="line1Text" class="text">LINE 1</div>
+                <div id="line2Text" class="text">LINE 2</div>
+            </div>
+            <img id="smallSquareImg" src="" alt="">
+        </div>
+    </div>
+
+    <!-- Controls Container -->
+    <div class="controls-container">
+        <!-- Large Square Controls (Aligned with Upload Background Image) -->
+        <div class="controls">
+            <h3>Background</h3>
+            <label for="line1Large">Top Text:</label>
+            <input type="text" id="line1Large" placeholder="CHEESEWORLD">
+            
+            <label for="line2Large">Bottom Text:</label>
+            <input type="text" id="line2Large" placeholder="CULT, INC">
+            
+            <label for="fontSizeLarge">Main Font Size:</label>
+            <input type="range" id="fontSizeLarge" min="20" max="200" value="30">
+        </div>
+
+        <!-- Small Square Controls (Aligned with Upload Small Image) -->
+        <div class="controls">
+            <h3>Gangstamp</h3>
+            <label for="line1">Line 1:</label>
+            <input type="text" id="line1" placeholder="YOU JUST GOT MUGGED BY">
+            
+            <label for="line2">Line 2:</label>
+            <input type="text" id="line2" placeholder="THE DRINKING VESSEL">
+            
+            <label for="fontSize">Stamp Font Size:</label>
+            <input type="range" id="fontSize" min="20" max="60" value="30">
+        </div>
+    </div>
+
+    <div class="drag-drop">
+        <div>
+            <button class="upload-button" id="uploadBackgroundBtn">Upload Background</button>
+            <input type="file" id="uploadBackground" accept="image/*">
+        </div>
+        <div>
+            <button class="upload-button" id="uploadSmallImageBtn">Upload Stamp</button>
+            <input type="file" id="uploadSmallImage" accept="image/*">
+        </div>
+    </div>
+
+    <div class="drag-drop">
+        <div class="drop-zone" id="dropBackground">
+            Drop Background Image
+        </div>
+        <div class="drop-zone" id="dropSmallImage">
+            Drop Stamp Image
+        </div>
+    </div>
+
+    <script>
+        window.onload = function () {
+            const bgImageZone = document.getElementById('dropBackground');
+            const smallImageZone = document.getElementById('dropSmallImage');
+            const smallSquare = document.getElementById('smallSquare');
+            const smallSquareImg = document.getElementById('smallSquareImg');
+            const line1Text = document.getElementById('line1Text');
+            const line2Text = document.getElementById('line2Text');
+            const line1LargeText = document.getElementById('line1LargeText');
+            const line2LargeText = document.getElementById('line2LargeText');
+            const fontSizeInput = document.getElementById('fontSize');
+            const line1Input = document.getElementById('line1');
+            const line2Input = document.getElementById('line2');
+            const fontSizeLargeInput = document.getElementById('fontSizeLarge');
+            const line1LargeInput = document.getElementById('line1Large');
+            const line2LargeInput = document.getElementById('line2Large');
+
+            // Draggable small square
+            let offsetX, offsetY, isDragging = false;
+
+            function startDrag(e) {
+                isDragging = true;
+                offsetX = e.clientX - smallSquare.offsetLeft;
+                offsetY = e.clientY - smallSquare.offsetTop;
+
+                // For touch events
+                if (e.touches) {
+                    offsetX = e.touches[0].clientX - smallSquare.offsetLeft;
+                    offsetY = e.touches[0].clientY - smallSquare.offsetTop;
+                }
+
+                document.addEventListener('mousemove', dragMove);
+                document.addEventListener('mouseup', stopDrag);
+
+                // For touch events
+                document.addEventListener('touchmove', dragMove);
+                document.addEventListener('touchend', stopDrag);
+            }
+
+            function dragMove(e) {
+                if (!isDragging) return;
+
+                let mouseX = e.clientX;
+                let mouseY = e.clientY;
+
+                // For touch events
+                if (e.touches) {
+                    mouseX = e.touches[0].clientX;
+                    mouseY = e.touches[0].clientY;
+                }
+
+                smallSquare.style.left = `${mouseX - offsetX}px`;
+                smallSquare.style.top = `${mouseY - offsetY}px`;
+            }
+
+            function stopDrag() {
+                isDragging = false;
+                document.removeEventListener('mousemove', dragMove);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchmove', dragMove);
+                document.removeEventListener('touchend', stopDrag);
+            }
+
+            smallSquare.addEventListener('mousedown', startDrag);
+            smallSquare.addEventListener('touchstart', startDrag);
+
+            function updateLayout() {
+                const container = document.querySelector('.canvas-container');
+                const canvasWidth = container.offsetWidth;
+                const canvasHeight = container.offsetHeight;
+
+                const fontSize = Math.min(canvasWidth, canvasHeight) * 0.08; 
+                line1Text.style.fontSize = fontSize + 'px';
+                line2Text.style.fontSize = fontSize + 'px';
+                line1LargeText.style.fontSize = fontSize + 'px';
+                line2LargeText.style.fontSize = fontSize + 'px';
+
+                line1Text.style.top = (canvasHeight * 0.002) + 'px';
+                line2Text.style.bottom = (canvasHeight * 0.008) + 'px';
+                line1LargeText.style.top = (canvasHeight * 0.005) + 'px';
+                line2LargeText.style.bottom = (canvasHeight * 0.02) + 'px';
+            }
+
+            window.addEventListener('resize', updateLayout);
+            updateLayout();
+
+            bgImageZone.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                bgImageZone.style.backgroundColor = "#e0e0e0";
+            });
+
+            bgImageZone.addEventListener('dragleave', function () {
+                bgImageZone.style.backgroundColor = "#f4f4f4";
+            });
+
+            bgImageZone.addEventListener('drop', function (e) {
+                e.preventDefault();
+                bgImageZone.style.backgroundColor = "#f4f4f4";
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image')) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        document.querySelector('.background-image').style.backgroundImage = `url(${event.target.result})`;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    alert("Please drop a valid image file.");
+                }
+            });
+
+            smallImageZone.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                smallImageZone.style.backgroundColor = "#e0e0e0";
+            });
+
+            smallImageZone.addEventListener('dragleave', function () {
+                smallImageZone.style.backgroundColor = "#f4f4f4";
+            });
+
+            smallImageZone.addEventListener('drop', function (e) {
+                e.preventDefault();
+                smallImageZone.style.backgroundColor = "#f4f4f4";
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image')) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        smallSquareImg.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    alert("Please drop a valid image file.");
+                }
+            });
+
+            const uploadBackground = document.getElementById('uploadBackground');
+            const uploadSmallImage = document.getElementById('uploadSmallImage');
+
+            document.getElementById('uploadBackgroundBtn').addEventListener('click', function () {
+                uploadBackground.click();
+            });
+
+            document.getElementById('uploadSmallImageBtn').addEventListener('click', function () {
+                uploadSmallImage.click();
+            });
+
+            uploadBackground.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith('image')) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        document.querySelector('.background-image').style.backgroundImage = `url(${event.target.result})`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            uploadSmallImage.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith('image')) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        smallSquareImg.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Dynamically update text and font size
+            line1Input.addEventListener('input', function () {
+                line1Text.textContent = line1Input.value;
+            });
+
+            line2Input.addEventListener('input', function () {
+                line2Text.textContent = line2Input.value;
+            });
+
+            fontSizeInput.addEventListener('input', function () {
+                const fontSize = fontSizeInput.value + 'px';
+                line1Text.style.fontSize = fontSize;
+                line2Text.style.fontSize = fontSize;
+            });
+
+            line1LargeInput.addEventListener('input', function () {
+                line1LargeText.textContent = line1LargeInput.value;
+            });
+
+            line2LargeInput.addEventListener('input', function () {
+                line2LargeText.textContent = line2LargeInput.value;
+            });
+
+            fontSizeLargeInput.addEventListener('input', function () {
+                const fontSize = fontSizeLargeInput.value + 'px';
+                line1LargeText.style.fontSize = fontSize;
+                line2LargeText.style.fontSize = fontSize;
+            });
+        };
+    </script>
+</body>
+</html>
