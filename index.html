@@ -183,6 +183,24 @@
             display: none;
             margin-top: 20px;
         }
+
+        /* Color Button Styles */
+        #colorSelector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .color-button {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .color-button:hover {
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
@@ -234,6 +252,17 @@
             <!-- Rotation Slider -->
             <label for="rotateSlider">Rotate Stamp:</label>
             <input type="range" id="rotateSlider" min="0" max="360" value="0">
+            
+            <!-- Color Selector Section -->
+            <h3>Text Color</h3>
+            <div id="colorSelector">
+                <button class="color-button" id="colorWhite" style="background-color: white;"></button>
+                <button class="color-button" id="colorBlack" style="background-color: black;"></button>
+                <button class="color-button" id="colorYellow" style="background-color: yellow;"></button>
+                <button class="color-button" id="colorRed" style="background-color: red;"></button>
+                <button class="color-button" id="colorBlue" style="background-color: blue;"></button>
+                <button class="color-button" id="colorGreen" style="background-color: green;"></button>
+            </div>
         </div>
     </div>
 
@@ -257,174 +286,202 @@
         </div>
     </div>
 
-    <script>
-        window.onload = function () {
-            const smallSquare = document.getElementById('smallSquare');
-            const smallSquareImg = document.getElementById('smallSquareImg');
-            const line1Text = document.getElementById('line1Text');
-            const line2Text = document.getElementById('line2Text');
-            const line1LargeText = document.getElementById('line1LargeText');
-            const line2LargeText = document.getElementById('line2LargeText');
-            const fontSizeInput = document.getElementById('fontSize');
-            const line1Input = document.getElementById('line1');
-            const line2Input = document.getElementById('line2');
-            const fontSizeLargeInput = document.getElementById('fontSizeLarge');
-            const line1LargeInput = document.getElementById('line1Large');
-            const line2LargeInput = document.getElementById('line2Large');
-            const rotateSlider = document.getElementById('rotateSlider');
-            let offsetX, offsetY, isDragging = false;
-            let currentRotation = 0; // Track the rotation angle
+<script>
+    window.onload = function () {
+        const smallSquare = document.getElementById('smallSquare');
+        const smallSquareImg = document.getElementById('smallSquareImg');
+        const line1Text = document.getElementById('line1Text');
+        const line2Text = document.getElementById('line2Text');
+        const line1LargeText = document.getElementById('line1LargeText');
+        const line2LargeText = document.getElementById('line2LargeText');
+        const fontSizeInput = document.getElementById('fontSize');
+        const line1Input = document.getElementById('line1');
+        const line2Input = document.getElementById('line2');
+        const fontSizeLargeInput = document.getElementById('fontSizeLarge');
+        const line1LargeInput = document.getElementById('line1Large');
+        const line2LargeInput = document.getElementById('line2Large');
+        const rotateSlider = document.getElementById('rotateSlider');
+        let offsetX, offsetY, isDragging = false;
+        let currentRotation = 0;
 
-            // Function to start dragging the small square
-            function startDrag(e) {
-                isDragging = true;
-                offsetX = e.clientX - smallSquare.offsetLeft;
-                offsetY = e.clientY - smallSquare.offsetTop;
-
-                if (e.touches) {
-                    offsetX = e.touches[0].clientX - smallSquare.offsetLeft;
-                    offsetY = e.touches[0].clientY - smallSquare.offsetTop;
-                }
-
-                document.addEventListener('mousemove', dragMove);
-                document.addEventListener('mouseup', stopDrag);
-
-                if (e.touches) {
-                    document.addEventListener('touchmove', dragMove);
-                    document.addEventListener('touchend', stopDrag);
-                }
-            }
-
-            function dragMove(e) {
-                if (!isDragging) return;
-
-                let mouseX = e.clientX;
-                let mouseY = e.clientY;
-
-                if (e.touches) {
-                    mouseX = e.touches[0].clientX;
-                    mouseY = e.touches[0].clientY;
-                }
-
-                smallSquare.style.left = `${mouseX - offsetX}px`;
-                smallSquare.style.top = `${mouseY - offsetY}px`;
-            }
-
-            function stopDrag() {
-                isDragging = false;
-                document.removeEventListener('mousemove', dragMove);
-                document.removeEventListener('mouseup', stopDrag);
-                document.removeEventListener('touchmove', dragMove);
-                document.removeEventListener('touchend', stopDrag);
-            }
-
-            // Event listeners for drag
-            smallSquare.addEventListener('mousedown', startDrag);
-            smallSquare.addEventListener('touchstart', startDrag);
-
-            // Function to rotate the small square based on slider value
-            function updateRotation(degrees) {
-                currentRotation = degrees;
-                smallSquare.style.transform = `rotate(${currentRotation}deg)`;
-            }
-
-            // Update rotation when slider value changes
-            rotateSlider.addEventListener('input', function () {
-                updateRotation(rotateSlider.value);
-            });
-
-            // Dynamically adjust text size based on font size slider
-            fontSizeInput.addEventListener('input', function () {
-                line1Text.style.fontSize = `${fontSizeInput.value}px`;
-                line2Text.style.fontSize = `${fontSizeInput.value}px`;
-            });
-
-            fontSizeLargeInput.addEventListener('input', function () {
-                line1LargeText.style.fontSize = `${fontSizeLargeInput.value}px`;
-                line2LargeText.style.fontSize = `${fontSizeLargeInput.value}px`;
-            });
-
-            // Update text based on user input
-            line1Input.addEventListener('input', function () {
-                line1Text.textContent = line1Input.value;
-            });
-
-            line2Input.addEventListener('input', function () {
-                line2Text.textContent = line2Input.value;
-            });
-
-            line1LargeInput.addEventListener('input', function () {
-                line1LargeText.textContent = line1LargeInput.value;
-            });
-
-            line2LargeInput.addEventListener('input', function () {
-                line2LargeText.textContent = line2LargeInput.value;
-            });
-
-            // Handle background image upload
-            const uploadBackgroundBtn = document.getElementById('uploadBackgroundBtn');
-            const uploadBackground = document.getElementById('uploadBackground');
-
-            uploadBackgroundBtn.addEventListener('click', function () {
-                uploadBackground.click();
-            });
-
-            uploadBackground.addEventListener('change', function (e) {
-                const file = e.target.files[0];
+        // Drag-and-drop for background
+        const dropBackground = document.getElementById('dropBackground');
+        dropBackground.addEventListener('dragover', function (e) {
+            e.preventDefault(); // Allow drop
+        });
+        dropBackground.addEventListener('drop', function (e) {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0]; // Get the first file
+            if (file) {
                 const reader = new FileReader();
                 reader.onload = function (event) {
                     document.getElementById('backgroundImage').style.backgroundImage = `url(${event.target.result})`;
                 };
                 reader.readAsDataURL(file);
-            });
+            }
+        });
 
-            // Handle small square image upload
-            const uploadSmallImageBtn = document.getElementById('uploadSmallImageBtn');
-            const uploadSmallImage = document.getElementById('uploadSmallImage');
-
-            uploadSmallImageBtn.addEventListener('click', function () {
-                uploadSmallImage.click();
-            });
-
-            uploadSmallImage.addEventListener('change', function (e) {
-                const file = e.target.files[0];
+        // Drag-and-drop for small image
+        const dropSmallImage = document.getElementById('dropSmallImage');
+        dropSmallImage.addEventListener('dragover', function (e) {
+            e.preventDefault(); // Allow drop
+        });
+        dropSmallImage.addEventListener('drop', function (e) {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0]; // Get the first file
+            if (file) {
                 const reader = new FileReader();
                 reader.onload = function (event) {
-                    smallSquareImg.src = event.target.result;
+                    document.getElementById('smallSquareImg').src = event.target.result;
                 };
                 reader.readAsDataURL(file);
-            });
+            }
+        });
 
-            // Handle drag-and-drop for background
-            const dropBackground = document.getElementById('dropBackground');
-            dropBackground.addEventListener('dragover', function (e) {
-                e.preventDefault();
-            });
-            dropBackground.addEventListener('drop', function (e) {
-                e.preventDefault();
-                const file = e.dataTransfer.files[0];
-                const reader = new FileReader();
-                reader.onload = function (event) {
-                    document.getElementById('backgroundImage').style.backgroundImage = `url(${event.target.result})`;
-                };
-                reader.readAsDataURL(file);
-            });
+        // Handle file uploads for background and small image (upload buttons)
+        const uploadBackground = document.getElementById('uploadBackground');
+        const uploadSmallImage = document.getElementById('uploadSmallImage');
+        const backgroundImage = document.getElementById('backgroundImage');
+        const smallSquareImage = document.getElementById('smallSquareImg');
 
-            // Handle drag-and-drop for small image
-            const dropSmallImage = document.getElementById('dropSmallImage');
-            dropSmallImage.addEventListener('dragover', function (e) {
-                e.preventDefault();
-            });
-            dropSmallImage.addEventListener('drop', function (e) {
-                e.preventDefault();
-                const file = e.dataTransfer.files[0];
+        uploadBackground.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
                 const reader = new FileReader();
-                reader.onload = function (event) {
-                    smallSquareImg.src = event.target.result;
+                reader.onload = function (e) {
+                    backgroundImage.style.backgroundImage = `url(${e.target.result})`;
                 };
                 reader.readAsDataURL(file);
-            });
-        };
-    </script>
+            }
+        });
+
+        uploadSmallImage.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    smallSquareImg.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Upload button triggers
+        const uploadBackgroundBtn = document.getElementById('uploadBackgroundBtn');
+        const uploadSmallImageBtn = document.getElementById('uploadSmallImageBtn');
+
+        uploadBackgroundBtn.addEventListener('click', function () {
+            uploadBackground.click(); // Trigger file input click
+        });
+
+        uploadSmallImageBtn.addEventListener('click', function () {
+            uploadSmallImage.click(); // Trigger file input click
+        });
+
+        // Function to start dragging the small square
+        function startDrag(e) {
+            isDragging = true;
+            offsetX = e.clientX - smallSquare.offsetLeft;
+            offsetY = e.clientY - smallSquare.offsetTop;
+        }
+
+        // Function to drag the small square
+        function drag(e) {
+            if (!isDragging) return;
+            let left = e.clientX - offsetX;
+            let top = e.clientY - offsetY;
+            smallSquare.style.left = left + 'px';
+            smallSquare.style.top = top + 'px';
+        }
+
+        // Function to stop dragging
+        function stopDrag() {
+            isDragging = false;
+        }
+
+        // Add event listeners for dragging
+        smallSquare.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDrag);
+
+        // Update text when input fields change
+        line1Input.addEventListener('input', function () {
+            line1Text.innerText = line1Input.value;
+        });
+
+        line2Input.addEventListener('input', function () {
+            line2Text.innerText = line2Input.value;
+        });
+
+        line1LargeInput.addEventListener('input', function () {
+            line1LargeText.innerText = line1LargeInput.value;
+        });
+
+        line2LargeInput.addEventListener('input', function () {
+            line2LargeText.innerText = line2LargeInput.value;
+        });
+
+        // Update font size for small text
+        fontSizeInput.addEventListener('input', function () {
+            line1Text.style.fontSize = fontSizeInput.value + 'px';
+            line2Text.style.fontSize = fontSizeInput.value + 'px';
+        });
+
+        // Update font size for large text
+        fontSizeLargeInput.addEventListener('input', function () {
+            line1LargeText.style.fontSize = fontSizeLargeInput.value + 'px';
+            line2LargeText.style.fontSize = fontSizeLargeInput.value + 'px';
+        });
+
+        // Rotate the small square based on slider value
+        rotateSlider.addEventListener('input', function (e) {
+            currentRotation = e.target.value;
+            smallSquare.style.transform = `rotate(${currentRotation}deg)`;
+        });
+
+        // Color buttons
+        document.getElementById('colorWhite').addEventListener('click', () => {
+            line1Text.style.color = 'white';
+            line2Text.style.color = 'white';
+            line1LargeText.style.color = 'white';
+            line2LargeText.style.color = 'white';
+        });
+
+        document.getElementById('colorBlack').addEventListener('click', () => {
+            line1Text.style.color = 'black';
+            line2Text.style.color = 'black';
+            line1LargeText.style.color = 'black';
+            line2LargeText.style.color = 'black';
+        });
+
+        document.getElementById('colorYellow').addEventListener('click', () => {
+            line1Text.style.color = 'yellow';
+            line2Text.style.color = 'yellow';
+            line1LargeText.style.color = 'yellow';
+            line2LargeText.style.color = 'yellow';
+        });
+
+        document.getElementById('colorRed').addEventListener('click', () => {
+            line1Text.style.color = 'red';
+            line2Text.style.color = 'red';
+            line1LargeText.style.color = 'red';
+            line2LargeText.style.color = 'red';
+        });
+
+        document.getElementById('colorBlue').addEventListener('click', () => {
+            line1Text.style.color = 'blue';
+            line2Text.style.color = 'blue';
+            line1LargeText.style.color = 'blue';
+            line2LargeText.style.color = 'blue';
+        });
+
+        document.getElementById('colorGreen').addEventListener('click', () => {
+            line1Text.style.color = 'green';
+            line2Text.style.color = 'green';
+            line1LargeText.style.color = 'green';
+            line2LargeText.style.color = 'green';
+        });
+    };
+</script>
 </body>
 </html>
