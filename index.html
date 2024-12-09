@@ -3,28 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meme Generator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Impact&display=swap" rel="stylesheet">
+    <title>cultmaker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Impact&family=SF-Pro-Display:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        /* Prevent horizontal scrolling, keep vertical scroll */
+        :root {
+            --dark-bg: #000000;
+            --dark-surface: #000000;
+            --dark-text: #FF0000;
+            --accent-color: #FF0000;
+        }
+
         body, html {
             margin: 0;
             padding: 0;
-            height: 100%; /* Ensures full height of the window */
-            width: 100%; /* Ensures full width of the window */
-            box-sizing: border-box;
-            overflow-x: hidden; /* Prevents horizontal scrolling */
-            overflow-y: auto; /* Enables vertical scrolling */
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+            font-family: 'SF-Pro-Display', -apple-system, BlinkMacSystemFont, sans-serif;
         }
-        /* Canvas Container */
+
         .canvas-container {
             position: relative;
             width: 100vw;
             height: 100vw;
-            background-color: #ccc;
-            border: 0px solid #000;
-            margin: 0px auto;
+            background-color: var(--dark-surface);
             overflow: hidden;
+            border: 0px solid var(--dark-surface);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .background-image {
@@ -40,24 +48,24 @@
 
         .small-square {
             position: absolute;
-            background-color: rgba(255, 255, 255, 0.6);
-            border: 0px solid #000;
+            background-color: rgba(30, 30, 30, 0.7);
             z-index: 2;
-            cursor: grab;
+            cursor: move;
             width: 26%;
             height: 26%;
             top: 35%;
             left: 5%;
             overflow: hidden;
             transition: transform 0.1s ease;
+            border-radius: 0px;
         }
 
-        /* Ensuring image inside the small square is constrained */
         #smallSquareImg {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* or 'contain' if you want the entire image to fit */
+            object-fit: cover;
             pointer-events: none;
+            border-radius: 0px;
         }
 
         .large-square-text, .small-square-text {
@@ -83,123 +91,112 @@
             pointer-events: none;
         }
 
-        /* Restored padding as per original code */
-        #line1Text {
-            top: 0%;
-            padding: 0px;
-            width: 90%;
-            text-align: center;
+        .small-square-text .text {
+            font-family: "Impact", sans-serif;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
+            -webkit-text-stroke: 1.5px black;
         }
 
-        #line2Text {
-            bottom: 0%;
-            padding: 0px;
-            width: 90%;
-            text-align: center;
-        }
+        #line1Text, #line1LargeText { top: 0%; width: 90%; text-align: center; }
+        #line2Text, #line2LargeText { bottom: 0%; width: 90%; text-align: center; }
 
-        #line1LargeText {
-            top: 0%;
-            padding: 0px;
-            width: 90%;
-            text-align: center;
-        }
-
-        #line2LargeText {
-            bottom: 1.4%;
-            padding: 0px;
-            width: 90%;
-            text-align: center;
-        }
-
-        /* Controls Container */
         .controls-container {
             display: flex;
             justify-content: space-between;
             width: 100%;
-            max-width: 1200px;
+            max-width: 600px;
             margin: 0 auto;
-            margin-top: 0px;
-            align-items: flex-start;
+            padding: 0px;
         }
 
         .controls {
             width: 48%;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            background-color: white;
-            padding: 30px;
-            border-radius: 1px;
-            box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.1);
+            background-color: var(--dark-surface);
+            color: var(--dark-text);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .controls input[type="text"], .controls input[type="range"] {
-            margin: 2px 0;
+        .controls input {
             width: 100%;
-            padding: 2px;
+            margin: 6px 0;
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+            border: 1px solid var(--dark-text);
+            border-radius: 0px;
+            padding: 4px;
         }
 
         .drag-drop {
-            margin-top: 2px;
-            width: 100%;
             display: flex;
-            justify-content: space-between;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 0 20px;
         }
 
-        .drag-drop .drop-zone {
+        .drop-zone {
             width: 45%;
             height: 150px;
-            border: 1.5px dashed #000;
+            border: 2px dashed var(--accent-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
             text-align: center;
-            line-height: 150px;
-            font-size: 16px;
-            background-color: #f4f4f4;
-            color: #000;
+            background-color: var(--dark-surface);
+            color: var(--accent-color);
+            border-radius: 0px;
+            transition: background-color 0.6s ease;
+        }
+
+        .drop-zone:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+
+        .upload-button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
             cursor: pointer;
+            border-radius: 0px;
+            transition: transform 0.1s ease, box-shadow 0.2s ease;
+        }
+
+        .upload-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
 
         input[type="file"] {
             display: none;
         }
 
-        .upload-button {
-            display: inline-block;
-            padding: 5px 10px;
-            background-color: #53bba5;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 10px;
-        }
-
-        .upload-button:hover {
-            background-color: #53bb15;
-        }
-
-        #renderedImageWrapper {
-            display: none;
-            margin-top: 20px;
-        }
-
-        /* Color Button Styles */
         #colorSelector {
             display: flex;
-            gap: 10px;
+            gap: 3px;
+            margin-top: 0px;
+            justify-content: center;
         }
 
         .color-button {
-            width: 30px;
-            height: 30px;
-            border: none;
-            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            border-radius: 0%;
             cursor: pointer;
+            border: 2px solid var(--dark-surface);
+            transition: transform 0.1s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .color-button:hover {
-            opacity: 0.8;
+            transform: scale(1.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .color-button:active {
+            transform: scale(0.95);
         }
     </style>
 </head>
@@ -207,7 +204,6 @@
     <div class="canvas-container">
         <div id="backgroundImage" class="background-image"></div>
 
-        <!-- Large Background Text -->
         <div class="large-square-text">
             <div id="line1LargeText" class="text">TOP TEXT</div>
             <div id="line2LargeText" class="text">BOTTOM TEXT</div>
@@ -218,15 +214,13 @@
                 <div id="line1Text" class="text">LINE 1</div>
                 <div id="line2Text" class="text">LINE 2</div>
             </div>
-            <img id="smallSquareImg" src="" alt="you can drag this around">
+            <img id="smallSquareImg" src="" alt="Draggable stamp image">
         </div>
     </div>
 
-    <!-- Controls Container -->
     <div class="controls-container">
-        <!-- Large Square Controls (Aligned with Upload Background Image) -->
         <div class="controls">
-            <h3>Background</h3>
+            <h3>BACKGROUND</h3>
             <label for="line1Large">Top Text:</label>
             <input type="text" id="line1Large" placeholder="CHEESEWORLD">
             
@@ -235,13 +229,21 @@
             
             <label for="fontSizeLarge">Main Font Size:</label>
             <input type="range" id="fontSizeLarge" min="20" max="200" value="30">
+            <h3>TEXT COLOR</h3>
+            <div id="colorSelector">
+                <button class="color-button" id="colorWhite" style="background-color: white;"></button>
+                <button class="color-button" id="colorBlack" style="background-color: black; border: 0.5px solid #FF0000;"></button>
+                <button class="color-button" id="colorYellow" style="background-color: yellow;"></button>
+                <button class="color-button" id="colorRed" style="background-color: red;"></button>
+                <button class="color-button" id="colorBlue" style="background-color: blue;"></button>
+                <button class="color-button" id="colorGreen" style="background-color: green;"></button>
+            </div>
         </div>
 
-        <!-- Small Square Controls (Aligned with Upload Small Image) -->
         <div class="controls">
-            <h3>Gangstamp</h3>
+            <h3>GANGSTAMP</h3>
             <label for="line1">Line 1:</label>
-            <input type="text" id="line1" placeholder="YOU JUST GOT MUGGED BY">
+            <input type="text" id="line1" placeholder="YOU GOT MUGGED BY">
             
             <label for="line2">Line 2:</label>
             <input type="text" id="line2" placeholder="THE DRINKING VESSEL">
@@ -249,20 +251,10 @@
             <label for="fontSize">Stamp Font Size:</label>
             <input type="range" id="fontSize" min="20" max="60" value="30">
             
-            <!-- Rotation Slider -->
             <label for="rotateSlider">Rotate Stamp:</label>
             <input type="range" id="rotateSlider" min="0" max="360" value="0">
             
-            <!-- Color Selector Section -->
-            <h3>Text Color</h3>
-            <div id="colorSelector">
-                <button class="color-button" id="colorWhite" style="background-color: white;"></button>
-                <button class="color-button" id="colorBlack" style="background-color: black;"></button>
-                <button class="color-button" id="colorYellow" style="background-color: yellow;"></button>
-                <button class="color-button" id="colorRed" style="background-color: red;"></button>
-                <button class="color-button" id="colorBlue" style="background-color: blue;"></button>
-                <button class="color-button" id="colorGreen" style="background-color: green;"></button>
-            </div>
+           
         </div>
     </div>
 
@@ -278,17 +270,14 @@
     </div>
 
     <div class="drag-drop">
-        <div class="drop-zone" id="dropBackground">
-            Drop Background Image
-        </div>
-        <div class="drop-zone" id="dropSmallImage">
-            Drop Stamp Image
-        </div>
+        <div class="drop-zone" id="dropBackground">Drop Background Image</div>
+        <div class="drop-zone" id="dropSmallImage">Drop Stamp Image</div>
     </div>
 
-<script>
+    <script>
     window.onload = function () {
         const smallSquare = document.getElementById('smallSquare');
+        const canvasContainer = document.querySelector('.canvas-container');
         const smallSquareImg = document.getElementById('smallSquareImg');
         const line1Text = document.getElementById('line1Text');
         const line2Text = document.getElementById('line2Text');
@@ -304,6 +293,60 @@
         let offsetX, offsetY, isDragging = false;
         let currentRotation = 0;
 
+        // Function to constrain the small square within the canvas
+        function constrainSquare(left, top) {
+            const containerRect = canvasContainer.getBoundingClientRect();
+            const squareRect = smallSquare.getBoundingClientRect();
+
+            // Calculate boundaries
+            const minX = containerRect.left;
+            const maxX = containerRect.right - squareRect.width;
+            const minY = containerRect.top;
+            const maxY = containerRect.bottom - squareRect.height;
+
+            // Constrain X position
+            left = Math.max(minX, Math.min(left, maxX));
+
+            // Constrain Y position
+            top = Math.max(minY, Math.min(top, maxY));
+
+            return { left, top };
+        }
+
+        // Function to start dragging the small square
+        function startDrag(e) {
+            isDragging = true;
+            const rect = smallSquare.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+        }
+
+        // Function to drag the small square
+        function drag(e) {
+            if (!isDragging) return;
+            
+            // Calculate new position
+            let left = e.clientX - offsetX;
+            let top = e.clientY - offsetY;
+
+            // Constrain the position
+            const constrainedPos = constrainSquare(left, top);
+
+            // Apply constrained position
+            smallSquare.style.left = `${constrainedPos.left - canvasContainer.getBoundingClientRect().left}px`;
+            smallSquare.style.top = `${constrainedPos.top - canvasContainer.getBoundingClientRect().top}px`;
+        }
+
+        // Function to stop dragging
+        function stopDrag() {
+            isDragging = false;
+        }
+
+        // Add event listeners for dragging
+        smallSquare.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDrag);
+
         // Drag-and-drop for background
         const dropBackground = document.getElementById('dropBackground');
         dropBackground.addEventListener('dragover', function (e) {
@@ -316,7 +359,7 @@
                 const reader = new FileReader();
                 reader.onload = function (event) {
                     document.getElementById('backgroundImage').style.backgroundImage = `url(${event.target.result})`;
-                };
+                 };
                 reader.readAsDataURL(file);
             }
         });
