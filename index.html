@@ -253,8 +253,6 @@
             
             <label for="rotateSlider">Rotate Stamp:</label>
             <input type="range" id="rotateSlider" min="0" max="360" value="0">
-            
-           
         </div>
     </div>
 
@@ -296,143 +294,158 @@
     // Function to constrain the small square within the canvas
     function constrainSquare(left, top) {
         const containerRect = canvasContainer.getBoundingClientRect();
-        const squareRect = smallSquare.getBoundingClientRect();
+        const squareSize = smallSquare.offsetWidth;
+        const maxX = containerRect.width - squareSize;
+        const maxY = containerRect.height - squareSize;
 
-        // Calculate boundaries
-        const minX = containerRect.left;
-        const maxX = containerRect.right - squareRect.width;
-        const minY = containerRect.top;
-        const maxY = containerRect.bottom - squareRect.height;
-
-        // Constrain X position
-        left = Math.max(minX, Math.min(left, maxX));
-
-        // Constrain Y position
-        top = Math.max(minY, Math.min(top, maxY));
-
-        return { left, top };
+        return {
+            left: Math.max(0, Math.min(left, maxX)),
+            top: Math.max(0, Math.min(top, maxY)),
+        };
     }
 
-    // For dragging small square
+    // Drag event listeners for the small square
     smallSquare.addEventListener('mousedown', (e) => {
         isDragging = true;
-        const rect = smallSquare.getBoundingClientRect();
-        offsetX = e.clientX - rect.left;
-        offsetY = e.clientY - rect.top;
+        offsetX = e.clientX - smallSquare.getBoundingClientRect().left;
+        offsetY = e.clientY - smallSquare.getBoundingClientRect().top;
+        smallSquare.style.transition = 'none'; // Disable transition during drag
     });
 
-    function drag(e) {
+    document.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
-        let left = e.clientX - offsetX;
-        let top = e.clientY - offsetY;
-        const constrainedPos = constrainSquare(left, top);
-        smallSquare.style.left = `${constrainedPos.left - canvasContainer.getBoundingClientRect().left}px`;
-        smallSquare.style.top = `${constrainedPos.top - canvasContainer.getBoundingClientRect().top}px`;
-    }
 
-    function stopDrag() {
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+
+        const newLeft = mouseX - offsetX;
+        const newTop = mouseY - offsetY;
+
+        const constrained = constrainSquare(newLeft, newTop);
+        smallSquare.style.left = `${constrained.left}px`;
+        smallSquare.style.top = `${constrained.top}px`;
+    });
+
+    document.addEventListener('mouseup', () => {
         isDragging = false;
-    }
-
-    // Add event listeners for dragging
-    document.addEventListener('mousemove', drag);
-    document.addEventListener('mouseup', stopDrag);
-
-    // Prevent scrolling while dragging on touch devices
-    function startTouch(e) {
-        isDragging = true;
-        const touch = e.touches[0];
-        offsetX = touch.clientX - smallSquare.offsetLeft;
-        offsetY = touch.clientY - smallSquare.offsetTop;
-        e.preventDefault(); // Prevent scrolling
-    }
-
-    // Function to handle touch move
-    function touchMove(e) {
-        if (!isDragging) return;
-        const touch = e.touches[0];
-        let left = touch.clientX - offsetX;
-        let top = touch.clientY - offsetY;
-        const constrainedPos = constrainSquare(left, top);
-        smallSquare.style.left = `${constrainedPos.left - canvasContainer.getBoundingClientRect().left}px`;
-        smallSquare.style.top = `${constrainedPos.top - canvasContainer.getBoundingClientRect().top}px`;
-        e.preventDefault(); // Prevent scrolling
-    }
-
-    // Function to handle touch end
-    function stopTouch(e) {
-        isDragging = false;
-        e.preventDefault(); // Prevent scrolling
-    }
-
-    // Add touch event listeners
-    smallSquare.addEventListener('touchstart', startTouch);
-    document.addEventListener('touchmove', touchMove);
-    document.addEventListener('touchend', stopTouch);
-
-    // Drag-and-drop for background
-    const dropBackground = document.getElementById('dropBackground');
-    dropBackground.addEventListener('dragover', function (e) {
-        e.preventDefault();
-    });
-    dropBackground.addEventListener('drop', function (e) {
-        e.preventDefault();
-        const file = e.dataTransfer.files[0]; // Get the first file
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                document.getElementById('backgroundImage').style.backgroundImage = `url(${event.target.result})`;
-            };
-            reader.readAsDataURL(file);
-        }
+        smallSquare.style.transition = 'transform 0.1s ease'; // Re-enable transition after drag
     });
 
-    // Drag-and-drop for small image
-    const dropSmallImage = document.getElementById('dropSmallImage');
-    dropSmallImage.addEventListener('dragover', function (e) {
-        e.preventDefault();
-    });
-    dropSmallImage.addEventListener('drop', function (e) {
-        e.preventDefault();
-        const file = e.dataTransfer.files[0]; // Get the first file
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                document.getElementById('smallSquareImg').src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
+    // Change text color
+    function changeTextColor(color) {
+        line1Text.style.color = color;
+        line2Text.style.color = color;
+        line1LargeText.style.color = color;
+        line2LargeText.style.color = color;
+    }
+
+    // Event listeners for color buttons
+    document.getElementById('colorWhite').addEventListener('click', () => changeTextColor('white'));
+    document.getElementById('colorBlack').addEventListener('click', () => changeTextColor('black'));
+    document.getElementById('colorYellow').addEventListener('click', () => changeTextColor('yellow'));
+    document.getElementById('colorRed').addEventListener('click', () => changeTextColor('red'));
+    document.getElementById('colorBlue').addEventListener('click', () => changeTextColor('blue'));
+    document.getElementById('colorGreen').addEventListener('click', () => changeTextColor('green'));
+
+    // Update text and font size dynamically
+    line1Input.addEventListener('input', () => {
+        line1Text.textContent = line1Input.value;
     });
 
-    // Handle file uploads for background and small image
+    line2Input.addEventListener('input', () => {
+        line2Text.textContent = line2Input.value;
+    });
+
+    fontSizeInput.addEventListener('input', () => {
+        const fontSize = fontSizeInput.value;
+        line1Text.style.fontSize = `${fontSize}px`;
+        line2Text.style.fontSize = `${fontSize}px`;
+    });
+
+    // Update large text content
+    line1LargeInput.addEventListener('input', () => {
+        line1LargeText.textContent = line1LargeInput.value;
+    });
+
+    line2LargeInput.addEventListener('input', () => {
+        line2LargeText.textContent = line2LargeInput.value;
+    });
+
+    fontSizeLargeInput.addEventListener('input', () => {
+        const fontSize = fontSizeLargeInput.value;
+        line1LargeText.style.fontSize = `${fontSize}px`;
+        line2LargeText.style.fontSize = `${fontSize}px`;
+    });
+
+    // Update rotation of the small square
+    rotateSlider.addEventListener('input', () => {
+        currentRotation = rotateSlider.value;
+        smallSquare.style.transform = `rotate(${currentRotation}deg)`;
+    });
+
+    // Handle background image upload
     const uploadBackground = document.getElementById('uploadBackground');
-    const uploadSmallImage = document.getElementById('uploadSmallImage');
     const backgroundImage = document.getElementById('backgroundImage');
-    const smallSquareImage = document.getElementById('smallSquareImg');
-
-    uploadBackground.addEventListener('change', function (e) {
+    const dropBackground = document.getElementById('dropBackground');
+    
+    uploadBackground.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function (e) {
-                backgroundImage.style.backgroundImage = `url(${e.target.result})`;
+            reader.onload = () => {
+                backgroundImage.style.backgroundImage = `url(${reader.result})`;
             };
             reader.readAsDataURL(file);
         }
     });
 
-    uploadSmallImage.addEventListener('change', function (e) {
-        const file = e.target.files[0];
+    dropBackground.addEventListener('dragover', (e) => {
+        e.preventDefault();
+    });
+
+    dropBackground.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function (e) {
-                smallSquareImg.src = e.target.result;
+            reader.onload = () => {
+                backgroundImage.style.backgroundImage = `url(${reader.result})`;
             };
             reader.readAsDataURL(file);
         }
     });
 
-    // Upload button triggers
+    // Handle small image upload
+    const uploadSmallImage = document.getElementById('uploadSmallImage');
+    const dropSmallImage = document.getElementById('dropSmallImage');
+    
+    uploadSmallImage.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                smallSquareImg.src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    dropSmallImage.addEventListener('dragover', (e) => {
+        e.preventDefault();
+    });
+
+    dropSmallImage.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                smallSquareImg.src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+// Upload button triggers
     const uploadBackgroundBtn = document.getElementById('uploadBackgroundBtn');
     const uploadSmallImageBtn = document.getElementById('uploadSmallImageBtn');
 
@@ -523,5 +536,6 @@
     });
 };
 </script>
+
 </body>
 </html>
