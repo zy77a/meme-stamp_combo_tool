@@ -304,7 +304,32 @@
         };
     }
 
-    // Drag event listeners for the small square
+    // For dragging with touch events (mobile)
+    smallSquare.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        const touch = e.touches[0];
+        offsetX = touch.clientX - smallSquare.getBoundingClientRect().left;
+        offsetY = touch.clientY - smallSquare.getBoundingClientRect().top;
+        smallSquare.style.transition = 'none'; // Disable transition during drag
+    });
+
+    smallSquare.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const touch = e.touches[0];
+        const newLeft = touch.clientX - offsetX;
+        const newTop = touch.clientY - offsetY;
+
+        const constrained = constrainSquare(newLeft, newTop);
+        smallSquare.style.left = `${constrained.left}px`;
+        smallSquare.style.top = `${constrained.top}px`;
+    });
+
+    smallSquare.addEventListener('touchend', () => {
+        isDragging = false;
+        smallSquare.style.transition = 'transform 0.1s ease'; // Re-enable transition after drag
+    });
+
+    // For dragging with mouse events (desktop)
     smallSquare.addEventListener('mousedown', (e) => {
         isDragging = true;
         offsetX = e.clientX - smallSquare.getBoundingClientRect().left;
@@ -445,7 +470,8 @@
             reader.readAsDataURL(file);
         }
     });
-// Upload button triggers
+
+    // Upload button triggers
     const uploadBackgroundBtn = document.getElementById('uploadBackgroundBtn');
     const uploadSmallImageBtn = document.getElementById('uploadSmallImageBtn');
 
@@ -534,7 +560,8 @@
         line1LargeText.style.color = 'green';
         line2LargeText.style.color = 'green';
     });
-};
+
+    };
 </script>
 
 </body>
