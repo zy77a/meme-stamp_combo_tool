@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
     <title>cultmaker</title>
     <link href="https://fonts.googleapis.com/css2?family=Impact&family=SF-Pro-Display:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -303,6 +303,66 @@
             top: Math.max(0, Math.min(top, maxY)),
         };
     }
+
+    // Prevent scrolling when dragging on mobile (touch events)
+    smallSquare.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        const touch = e.touches[0];
+        offsetX = touch.clientX - smallSquare.getBoundingClientRect().left;
+        offsetY = touch.clientY - smallSquare.getBoundingClientRect().top;
+        smallSquare.style.transition = 'none'; // Disable transition during drag
+        // Prevent default behavior to stop scroll
+        e.preventDefault();
+    });
+
+    smallSquare.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const touch = e.touches[0];
+        const newLeft = touch.clientX - offsetX;
+        const newTop = touch.clientY - offsetY;
+
+        const constrained = constrainSquare(newLeft, newTop);
+        smallSquare.style.left = `${constrained.left}px`;
+        smallSquare.style.top = `${constrained.top}px`;
+        // Prevent scrolling during drag
+        e.preventDefault();
+    });
+
+    smallSquare.addEventListener('touchend', () => {
+        isDragging = false;
+        smallSquare.style.transition = 'transform 0.1s ease'; // Re-enable transition after drag
+    });
+
+    // Prevent scrolling when dragging on desktop (mouse events)
+    smallSquare.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - smallSquare.getBoundingClientRect().left;
+        offsetY = e.clientY - smallSquare.getBoundingClientRect().top;
+        smallSquare.style.transition = 'none'; // Disable transition during drag
+        // Prevent default behavior to stop scroll
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+
+        const newLeft = mouseX - offsetX;
+        const newTop = mouseY - offsetY;
+
+        const constrained = constrainSquare(newLeft, newTop);
+        smallSquare.style.left = `${constrained.left}px`;
+        smallSquare.style.top = `${constrained.top}px`;
+        // Prevent scrolling during drag
+        e.preventDefault();
+    });
+
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+        smallSquare.style.transition = 'transform 0.1s ease'; // Re-enable transition after drag
+    }); //🪲
 
     // For dragging with touch events (mobile)
     smallSquare.addEventListener('touchstart', (e) => {
