@@ -311,6 +311,38 @@
             top = Math.max(minY, Math.min(top, maxY));
 
             return { left, top };
+            // Function to handle touch start
+function startTouch(e) {
+    isDragging = true;
+    const touch = e.touches[0];
+    offsetX = touch.clientX - smallSquare.offsetLeft;
+    offsetY = touch.clientY - smallSquare.offsetTop;
+}
+
+// Function to handle touch move
+function touchMove(e) {
+    if (!isDragging) return;
+    const touch = e.touches[0];
+    let left = touch.clientX - offsetX;
+    let top = touch.clientY - offsetY;
+
+    // Constrain the position
+    const constrainedPos = constrainSquare(left, top);
+
+    // Apply constrained position
+    smallSquare.style.left = `${constrainedPos.left - canvasContainer.getBoundingClientRect().left}px`;
+    smallSquare.style.top = `${constrainedPos.top - canvasContainer.getBoundingClientRect().top}px`;
+}
+
+// Function to handle touch end
+function stopTouch() {
+    isDragging = false;
+}
+
+// Add touch event listeners
+smallSquare.addEventListener('touchstart', startTouch);
+document.addEventListener('touchmove', touchMove);
+document.addEventListener('touchend', stopTouch);
         }
 
         // Function to start dragging the small square
